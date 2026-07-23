@@ -7,39 +7,75 @@
 <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
-  <div class="crt">
-    <header class="topbar">
-      <span class="dot"></span>
-      <span class="dot"></span>
-      <span class="dot"></span>
-      <span class="title">voice-agent@groq:~$</span>
-    </header>
+  <canvas id="matrix-bg"></canvas>
 
-    <main class="stage">
-      <button id="mic" class="mic" aria-label="Push to talk">
-        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6">
-          <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"/>
-          <path d="M19 11a7 7 0 0 1-14 0"/>
-          <path d="M12 18v3"/>
-        </svg>
-      </button>
-      <div id="status" class="status">click to talk</div>
-      <div id="rings" class="rings" hidden>
-        <span></span><span></span><span></span>
+  <div id="auth-view" class="auth-view">
+    <div class="auth-card glass">
+      <h1 class="brand-title">voice<span>_</span>agent</h1>
+      <p class="brand-sub">built by Raahul Sallagunta · powered by Groq</p>
+
+      <div class="auth-tabs">
+        <button type="button" data-tab="login" class="tab active">log in</button>
+        <button type="button" data-tab="signup" class="tab">sign up</button>
+      </div>
+
+      <form id="login-form" class="auth-form">
+        <input type="email" id="login-email" placeholder="email" autocomplete="username" required />
+        <input type="password" id="login-password" placeholder="password" autocomplete="current-password" required />
+        <button type="submit">enter&gt;</button>
+      </form>
+
+      <form id="signup-form" class="auth-form" hidden>
+        <input type="text" id="signup-name" placeholder="name" autocomplete="name" required />
+        <input type="email" id="signup-email" placeholder="email" autocomplete="username" required />
+        <input type="password" id="signup-password" placeholder="password (min 8 chars)" autocomplete="new-password" minlength="8" required />
+        <button type="submit">create account&gt;</button>
+      </form>
+
+      <div id="auth-error" class="auth-error"></div>
+    </div>
+  </div>
+
+  <div id="app-view" class="app-view" hidden>
+    <aside class="sidebar glass">
+      <div class="sidebar__header">
+        <span class="brand-title small">voice<span>_</span>agent</span>
+      </div>
+      <button id="new-chat" class="new-chat-btn">+ new chat</button>
+      <div id="chat-list" class="chat-list"></div>
+      <div class="sidebar__footer">
+        <span id="user-name" class="user-name"></span>
+        <button id="logout" class="logout-btn">log out</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div id="messages" class="messages">
+        <div class="messages__hint">&gt; start a conversation — type, talk, or drop in a file</div>
+      </div>
+
+      <div id="voice-status" class="voice-status"></div>
+
+      <div class="composer glass">
+        <button id="upload-btn" class="icon-btn" title="upload a file" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12.5V7a2 2 0 0 0-2-2H8.5L6 7.5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8"/><circle cx="18" cy="18" r="3.5"/><path d="M18 16.5v3M16.5 18h3"/></svg>
+        </button>
+        <input id="file-input" type="file" hidden accept=".pdf,.docx,.txt,.md,.py,.js,.ts,.java,.json,.csv,.yaml,.yml" />
+
+        <textarea id="text-input" placeholder="Message voice-agent, or click the mic to talk…" rows="1"></textarea>
+
+        <button id="mic" class="icon-btn mic-btn" title="push to talk" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v3"/></svg>
+        </button>
+
+        <button id="send" class="icon-btn send-btn" title="send" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12 20 4l-6 16-3-7-7-1Z"/></svg>
+        </button>
       </div>
     </main>
-
-    <section class="log" id="log" aria-live="polite">
-      <div class="log__hint">&gt; conversation history will appear here</div>
-    </section>
-
-    <footer class="footer">
-      <button id="reset" class="reset">reset session</button>
-      <span class="model-tag">stt: whisper-large-v3-turbo · llm: llama-3.3-70b-versatile · tts: orpheus-v1</span>
-    </footer>
   </div>
 
   <audio id="player" hidden></audio>
-  <script src="/static/js/main.js"></script>
+  <script type="module" src="/static/js/app.js"></script>
 </body>
 </html>
