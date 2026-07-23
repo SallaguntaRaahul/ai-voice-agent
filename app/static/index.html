@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>voice-agent // groq</title>
+<link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <div class="crt">
+    <header class="topbar">
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="title">voice-agent@groq:~$</span>
+    </header>
+
+    <main class="stage">
+      <button id="mic" class="mic" aria-label="Push to talk">
+        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6">
+          <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"/>
+          <path d="M19 11a7 7 0 0 1-14 0"/>
+          <path d="M12 18v3"/>
+        </svg>
+      </button>
+      <div id="status" class="status">click to talk</div>
+      <div id="rings" class="rings" hidden>
+        <span></span><span></span><span></span>
+      </div>
+    </main>
+
+    <section class="log" id="log" aria-live="polite">
+      <div class="log__hint">&gt; conversation history will appear here</div>
+    </section>
+
+    <footer class="footer">
+      <button id="reset" class="reset">reset session</button>
+      <span class="model-tag">stt: whisper-large-v3-turbo · llm: llama-3.3-70b-versatile · tts: orpheus-v1</span>
+    </footer>
+  </div>
+
+  <audio id="player" hidden></audio>
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
