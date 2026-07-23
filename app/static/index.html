@@ -37,9 +37,12 @@
   </div>
 
   <div id="app-view" class="app-view" hidden>
-    <aside class="sidebar glass">
+    <div id="sidebar-backdrop" class="sidebar-backdrop" hidden></div>
+
+    <aside id="sidebar" class="sidebar glass">
       <div class="sidebar__header">
         <span class="brand-title small">voice<span>_</span>agent</span>
+        <button id="sidebar-close" class="icon-btn sidebar-close-btn" title="close menu" type="button">&times;</button>
       </div>
       <button id="new-chat" class="new-chat-btn">+ new chat</button>
       <div id="chat-list" class="chat-list"></div>
@@ -50,6 +53,13 @@
     </aside>
 
     <main class="main">
+      <div class="mobile-topbar">
+        <button id="sidebar-open" class="icon-btn" title="open menu" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+        <span class="brand-title small">voice<span>_</span>agent</span>
+      </div>
+
       <div id="messages" class="messages">
         <div class="messages__hint">&gt; start a conversation — type, talk, or drop in a file</div>
       </div>

@@ -18,6 +18,9 @@ client = TestClient(app)
 def _signup(email="user@example.com", password="password123", name="Test User"):
     res = client.post("/api/auth/signup", json={"email": email, "password": password, "name": name})
     assert res.status_code == 200, res.text
+
+    res = client.post("/api/auth/login", json={"email": email, "password": password})
+    assert res.status_code == 200, res.text
     return res.json()["access_token"]
 
 
@@ -138,6 +141,29 @@ def test_voice_turn_round_trip():
     assert body["transcript"] == "hello there"
     assert body["reply_text"] == "hi, how can I help?"
     assert body["audio_base64"]
+
+
+def test_voice_turn_degrades_gracefully_when_tts_fails():
+    token = _signup(email="ttsfail@example.com")
+    headers = _auth_headers(token)
+    chat_id = client.post("/api/chats", headers=headers).json()["id"]
+
+    with patch("app.main.groq_client.transcribe_audio", new=AsyncMock(return_value="hello there")), \
+         patch("app.main.groq_client.chat_reply", new=AsyncMock(return_value="hi, how can I help?")), \
+         patch("app.main.groq_client.synthesize_speech", new=AsyncMock(side_effect=RuntimeError("quota exceeded"))):
+        res = client.post(
+            f"/api/chats/{chat_id}/voice",
+            headers=headers,
+            files={"audio": ("turn.webm", b"fake-audio-bytes", "audio/webm")},
+        )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["transcript"] == "hello there"
+    assert body["reply_text"] == "hi, how can I help?"
+    assert body["audio_base64"] == ""
+
+    messages = client.get(f"/api/chats/{chat_id}/messages", headers=headers).json()
+    assert [m["role"] for m in messages] == ["user", "assistant"]
 
 
 def test_voice_turn_rejects_empty_audio():

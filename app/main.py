@@ -65,6 +65,10 @@ class AuthResponse(BaseModel):
     user: dict
 
 
+class SignupResponse(BaseModel):
+    user: dict
+
+
 class ChatOut(BaseModel):
     id: int
     title: str
@@ -102,7 +106,7 @@ async def health():
 
 # ---------- auth ----------
 
-@app.post("/api/auth/signup", response_model=AuthResponse)
+@app.post("/api/auth/signup", response_model=SignupResponse)
 async def signup(body: SignupRequest, db: Session = Depends(get_session)):
     existing = db.exec(select(User).where(User.email == body.email)).first()
     if existing:
@@ -115,8 +119,7 @@ async def signup(body: SignupRequest, db: Session = Depends(get_session)):
     db.commit()
     db.refresh(user)
 
-    token = create_access_token(user.id)
-    return AuthResponse(access_token=token, user={"id": user.id, "email": user.email, "name": user.name})
+    return SignupResponse(user={"id": user.id, "email": user.email, "name": user.name})
 
 
 @app.post("/api/auth/login", response_model=AuthResponse)
@@ -282,16 +285,24 @@ async def voice_turn(
         assistant_msg = Message(chat_id=chat.id, role="assistant", content=reply_text)
         db.add(assistant_msg)
         db.commit()
-
-        audio_reply = await groq_client.synthesize_speech(reply_text)
     except HTTPException:
         raise
     except Exception:
-        logger.exception("voice turn failed")
+        logger.exception("voice turn failed (transcribe/chat step)")
         raise HTTPException(status_code=502, detail="Upstream voice pipeline error")
+
+    # TTS is best-effort: the transcript + reply are already saved, so a TTS
+    # failure (e.g. Groq's daily token quota for the voice model) shouldn't
+    # discard a reply the user is still waiting to see — just skip audio.
+    audio_base64 = ""
+    try:
+        audio_reply = await groq_client.synthesize_speech(reply_text)
+        audio_base64 = base64.b64encode(audio_reply).decode("ascii")
+    except Exception:
+        logger.exception("voice turn: TTS synthesis failed, returning text-only reply")
 
     return VoiceResponse(
         transcript=transcript,
         reply_text=reply_text,
-        audio_base64=base64.b64encode(audio_reply).decode("ascii"),
+        audio_base64=audio_base64,
     )

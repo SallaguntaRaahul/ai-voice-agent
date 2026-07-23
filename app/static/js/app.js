@@ -16,6 +16,10 @@ const chatListEl = document.getElementById("chat-list");
 const newChatBtn = document.getElementById("new-chat");
 const userNameEl = document.getElementById("user-name");
 const logoutBtn = document.getElementById("logout");
+const sidebarEl = document.getElementById("sidebar");
+const sidebarBackdrop = document.getElementById("sidebar-backdrop");
+const sidebarOpenBtn = document.getElementById("sidebar-open");
+const sidebarCloseBtn = document.getElementById("sidebar-close");
 
 const messagesEl = document.getElementById("messages");
 const voiceStatusEl = document.getElementById("voice-status");
@@ -65,15 +69,18 @@ loginForm.addEventListener("submit", async (e) => {
 signupForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   authError.textContent = "";
+  const email = document.getElementById("signup-email").value.trim();
   try {
-    const res = await api.signup(
-      document.getElementById("signup-email").value.trim(),
-      document.getElementById("signup-password").value,
-      document.getElementById("signup-name").value.trim()
-    );
-    setToken(res.access_token);
-    await enterApp(res.user);
+    await api.signup(email, document.getElementById("signup-password").value, document.getElementById("signup-name").value.trim());
+    signupForm.reset();
+
+    document.querySelector('.tab[data-tab="login"]').click();
+    document.getElementById("login-email").value = email;
+    document.getElementById("login-password").focus();
+    authError.style.color = "var(--accent)";
+    authError.textContent = "Account created — log in below.";
   } catch (err) {
+    authError.style.color = "";
     authError.textContent = err.message;
   }
 });
@@ -107,6 +114,22 @@ async function enterApp(user) {
     clearToken();
   }
 })();
+
+// ---------- mobile sidebar drawer ----------
+
+function openSidebar() {
+  sidebarEl.classList.add("open");
+  sidebarBackdrop.hidden = false;
+}
+
+function closeSidebar() {
+  sidebarEl.classList.remove("open");
+  sidebarBackdrop.hidden = true;
+}
+
+sidebarOpenBtn.addEventListener("click", openSidebar);
+sidebarCloseBtn.addEventListener("click", closeSidebar);
+sidebarBackdrop.addEventListener("click", closeSidebar);
 
 // ---------- chats ----------
 
@@ -153,6 +176,7 @@ async function createChat() {
 async function selectChat(chatId) {
   activeChatId = chatId;
   renderChatList();
+  closeSidebar();
   const messages = await api.getMessages(chatId);
   messagesEl.innerHTML = "";
   if (messages.length === 0) {
@@ -349,11 +373,15 @@ async function handleRecordingStopped() {
     renderMessage("assistant", data.reply_text);
     scrollToBottom();
 
-    const audioBytes = Uint8Array.from(atob(data.audio_base64), (c) => c.charCodeAt(0));
-    player.src = URL.createObjectURL(new Blob([audioBytes], { type: "audio/wav" }));
-    voiceStatusEl.textContent = "speaking… click mic to interrupt";
-    await player.play();
-    player.onended = () => { voiceStatusEl.textContent = ""; };
+    if (data.audio_base64) {
+      const audioBytes = Uint8Array.from(atob(data.audio_base64), (c) => c.charCodeAt(0));
+      player.src = URL.createObjectURL(new Blob([audioBytes], { type: "audio/wav" }));
+      voiceStatusEl.textContent = "speaking… click mic to interrupt";
+      await player.play();
+      player.onended = () => { voiceStatusEl.textContent = ""; };
+    } else {
+      voiceStatusEl.textContent = "voice reply unavailable right now — see text above";
+    }
   } catch (err) {
     voiceStatusEl.textContent = `error: ${err.message}`;
   } finally {
