@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from pathlib import Path
@@ -26,8 +27,17 @@ logger = logging.getLogger("voice-agent")
 STATIC_DIR = Path(__file__).parent / "static"
 
 
+REQUIRED_ENV_VARS = ["GROQ_API_KEY", "JWT_SECRET"]
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    missing = [name for name in REQUIRED_ENV_VARS if not os.environ.get(name)]
+    if missing:
+        raise RuntimeError(
+            f"Missing required environment variable(s): {', '.join(missing)}. "
+            "Set them before starting the app (see .env.example)."
+        )
     init_db()
     yield
 

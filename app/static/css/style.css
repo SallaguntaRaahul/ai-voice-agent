@@ -28,7 +28,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--mono);
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 #matrix-bg {
@@ -51,7 +51,8 @@ body {
 .auth-view {
   position: relative;
   z-index: 1;
-  height: 100vh;
+  min-height: 100vh;
+  overflow-y: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -158,6 +159,7 @@ body {
   height: 100vh;
   display: grid;
   grid-template-columns: 260px 1fr;
+  min-height: 0;
 }
 
 .sidebar {
@@ -168,6 +170,7 @@ body {
   border-top: none;
   border-bottom: none;
   padding: 16px 12px;
+  min-height: 0;
 }
 
 .sidebar__header { padding: 4px 8px 16px; }
@@ -187,6 +190,7 @@ body {
 
 .chat-list {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -256,11 +260,13 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
   padding: 20px 24px 16px;
 }
 
 .messages {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
