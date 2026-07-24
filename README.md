@@ -4,6 +4,8 @@ A ChatGPT-style assistant you can talk to, type to, hand a file to, or all
 three in the same conversation — built end-to-end on one Groq API key, with
 its own accounts and persistent chat history.
 
+Live Site: https://ai-voice-agent-d9fu.onrender.com
+
 ## Features
 
 - **Voice mode** — click the mic, talk, get a spoken reply. Clicking the mic
